@@ -433,10 +433,11 @@ actarea/
 │   └── evaluation.py           # Métricas y visualizaciones
 ├── results/                    # Resultados generados
 ├── models/                     # Modelos guardados
-├── main.py                     # Script principal
+├── main.py                     # Script principal de comparación
 ├── test_models.py              # Pruebas unitarias
-├── demo.py                     # Demostración interactiva
-├── webcam_demo.py              # Demo en tiempo real con webcam
+├── demo.py                     # Demostración con imágenes
+├── webcam_demo.py              # Demo básico con webcam
+├── webcam_dashboard.py         # Dashboard profesional con webcam
 ├── requirements.txt            # Dependencias
 └── README.md                   # Este documento
 ```
@@ -564,7 +565,7 @@ python demo.py --random           # Analizar muestras aleatorias
 ```
 
 #### 7.2.9 `webcam_demo.py` - Demo en Tiempo Real con Webcam
-Demo interactivo que usa la cámara web para reconocimiento en vivo:
+Demo interactivo básico que usa la cámara web para reconocimiento en vivo:
 - **Detección de rostros** en tiempo real con Haar Cascade
 - **Predicción de emociones** con OpenCV y/o DeepFace
 - **Visualización** de probabilidades en barra lateral
@@ -576,6 +577,22 @@ Demo interactivo que usa la cámara web para reconocimiento en vivo:
 python webcam_demo.py             # Usar ambos modelos
 python webcam_demo.py --opencv    # Solo OpenCV (más rápido)
 python webcam_demo.py --deepface  # Solo DeepFace (más preciso)
+```
+
+#### 7.2.10 `webcam_dashboard.py` - Dashboard Profesional con Webcam
+Dashboard avanzado con interfaz visual estilo corporativo:
+- **Panel inferior** con barras de probabilidades para cada emoción
+- **Comparación lado a lado** de OpenCV vs DeepFace en tiempo real
+- **Rectángulos redondeados** alrededor del rostro detectado
+- **Suavizado de predicciones** para evitar parpadeo (smoothing)
+- **Degradados** y diseño visual profesional
+- **Controles:** q=salir, s=screenshot
+
+```bash
+# Uso desde terminal
+python webcam_dashboard.py             # Ambos modelos lado a lado
+python webcam_dashboard.py --opencv    # Solo OpenCV
+python webcam_dashboard.py --deepface  # Solo DeepFace
 ```
 
 ### 7.3 Código Principal
@@ -592,30 +609,73 @@ El archivo `main.py` ejecuta la comparación completa:
 
 ## 8. Resultados y Análisis
 
-### 8.1 Resultados Esperados
+### 8.1 Resultados Obtenidos
 
-Basándose en la literatura y benchmarks previos, se esperan los siguientes rangos de rendimiento:
+Los siguientes resultados fueron obtenidos ejecutando `python main.py --quick` con 70 imágenes de test (10 por emoción):
 
-| Modelo | Accuracy Esperado | F1-Score Esperado |
-|--------|-------------------|-------------------|
-| OpenCV (HOG+SVM) | 35-45% | 0.30-0.40 |
-| DeepFace (CNN) | 55-70% | 0.50-0.65 |
+#### Métricas Generales
 
-### 8.2 Análisis por Emoción
+| Métrica | OpenCV | DeepFace | Mejor |
+|---------|--------|----------|-------|
+| **Accuracy** | 44.29% | **51.43%** | DeepFace |
+| **Precision (Macro)** | 45.48% | **54.00%** | DeepFace |
+| **Recall (Macro)** | 44.29% | **51.43%** | DeepFace |
+| **F1-Score (Macro)** | 43.31% | **52.00%** | DeepFace |
+| Predicciones Válidas | 70/70 | 70/70 | Empate |
 
-Las emociones presentan diferentes niveles de dificultad:
+#### Rendimiento por Emoción
 
-| Emoción | Dificultad | Razón |
-|---------|-----------|-------|
-| Happy | Fácil | Sonrisa muy distintiva |
-| Surprise | Fácil | Ojos y boca abiertos |
-| Angry | Media | Puede confundirse con disgust |
-| Sad | Media | Expresión sutil |
-| Neutral | Media | Sin características distintivas |
-| Fear | Difícil | Similar a surprise |
-| Disgust | Muy difícil | Pocas muestras, expresión variable |
+| Emoción | OpenCV | DeepFace | Observación |
+|---------|--------|----------|-------------|
+| Angry | 50% (5/10) | 30% (3/10) | OpenCV mejor |
+| Disgust | **80% (8/10)** | 50% (5/10) | OpenCV mejor |
+| Fear | 0% (0/10) | **40% (4/10)** | DeepFace mejor |
+| Happy | 60% (6/10) | **70% (7/10)** | DeepFace mejor |
+| Neutral | 30% (3/10) | **50% (5/10)** | DeepFace mejor |
+| Sad | 30% (3/10) | **40% (4/10)** | DeepFace mejor |
+| Surprise | 60% (6/10) | **80% (8/10)** | DeepFace mejor |
 
-### 8.3 Comparación de Eficiencia
+### 8.2 Visualizaciones de Resultados
+
+#### Matrices de Confusión
+
+![Matrices de Confusión](results/confusion_matrices_20251130_222340.png)
+
+*Las matrices muestran cómo cada modelo clasifica las emociones. La diagonal representa predicciones correctas.*
+
+#### Comparación de Métricas
+
+![Comparación de Métricas](results/metrics_comparison_20251130_222340.png)
+
+*Gráfico de barras comparando accuracy, precision, recall y F1-score entre ambos modelos.*
+
+#### Rendimiento por Emoción
+
+![Rendimiento por Emoción](results/per_emotion_comparison_20251130_222340.png)
+
+*Accuracy desglosado por cada una de las 7 emociones del dataset FER2013.*
+
+#### Tiempos de Procesamiento
+
+![Tiempos de Procesamiento](results/processing_times_20251130_222340.png)
+
+*Comparación del tiempo total de procesamiento entre OpenCV y DeepFace.*
+
+### 8.3 Análisis de Resultados
+
+#### Hallazgos Principales:
+
+1. **DeepFace supera a OpenCV en accuracy general** (51.43% vs 44.29%), confirmando que el deep learning es más efectivo para esta tarea.
+
+2. **OpenCV destaca en "Disgust"** (80% vs 50%), posiblemente porque las características HOG capturan bien los patrones faciales de esta emoción.
+
+3. **OpenCV falla completamente en "Fear"** (0%), confundiéndola con otras emociones como "Surprise".
+
+4. **DeepFace es más consistente** - tiene rendimiento más balanceado entre todas las emociones.
+
+5. **"Happy" y "Surprise" son las más fáciles** de detectar para ambos modelos.
+
+### 8.4 Comparación de Eficiencia
 
 | Aspecto | OpenCV | DeepFace |
 |---------|--------|----------|
@@ -623,20 +683,6 @@ Las emociones presentan diferentes niveles de dificultad:
 | Uso de memoria | ~200 MB | ~1-2 GB |
 | Requiere GPU | No | Recomendado |
 | Tamaño del modelo | ~5 MB | ~500 MB |
-
-### 8.4 Matrices de Confusión
-
-Las matrices de confusión revelan patrones de error típicos:
-
-**OpenCV:**
-- Tiende a confundir sad con neutral
-- Fear frecuentemente clasificado como surprise
-- Disgust casi siempre mal clasificado
-
-**DeepFace:**
-- Mejor separación entre clases
-- Aún confunde fear/surprise
-- Mayor precisión en happy y surprise
 
 ### 8.5 Análisis de Errores
 
@@ -857,7 +903,7 @@ python demo.py --image ruta/a/imagen.jpg
 python demo.py --random
 ```
 
-#### Demo con Webcam (Tiempo Real)
+#### Demo con Webcam (Tiempo Real) - Básico
 
 ```bash
 # Ejecutar demo con ambos modelos
@@ -870,18 +916,57 @@ python webcam_demo.py --opencv
 python webcam_demo.py --deepface
 ```
 
+#### Dashboard Profesional con Webcam (Recomendado)
+
+El archivo `webcam_dashboard.py` ofrece una interfaz visual más elaborada con panel de barras de emociones:
+
+```bash
+# Ejecutar dashboard con ambos modelos comparados lado a lado
+python webcam_dashboard.py
+
+# Solo OpenCV (más rápido)
+python webcam_dashboard.py --opencv
+
+# Solo DeepFace (más preciso)
+python webcam_dashboard.py --deepface
+```
+
+**Características del Dashboard:**
+- Panel inferior con barras de probabilidades para cada emoción
+- Comparación lado a lado de OpenCV vs DeepFace
+- Rectángulo redondeado alrededor del rostro detectado
+- Suavizado de predicciones para evitar parpadeo
+- Diseño visual profesional con degradados
+- Contador de FPS en tiempo real
+
 **Controles de la Webcam:**
 | Tecla | Acción |
 |-------|--------|
 | `q` | Salir del programa |
-| `s` | Guardar captura de pantalla |
+| `s` | Guardar captura de pantalla en `results/` |
 
-**Características del demo:**
-- Detección de rostros en tiempo real
-- Muestra predicción de OpenCV y DeepFace simultáneamente
-- Barra lateral con probabilidades por emoción
-- Contador de FPS para monitorear rendimiento
-- Colores distintivos para cada emoción
+**Vista previa del Dashboard:**
+```
+┌─────────────────────────────────────────────────────────┐
+│                    VIDEO EN VIVO                        │
+│                                                         │
+│         DeepFace: Happy    OpenCV: Happy                │
+│              ┌──────────┐                               │
+│              │  ROSTRO  │                               │
+│              └──────────┘                               │
+│                                                FPS: 15  │
+├─────────────────────────────────────────────────────────┤
+│  OpenCV (Machine Learning)  │  DeepFace (Deep Learning) │
+│                             │                           │
+│  Angry    ████░░░░░  25%    │  Angry    ██░░░░░░░  10%  │
+│  Disgust  ██░░░░░░░  12%    │  Disgust  █░░░░░░░░   5%  │
+│  Fear     █░░░░░░░░   8%    │  Fear     ██░░░░░░░   8%  │
+│  Happy    ████████░  85%    │  Happy    █████████  92%  │
+│  Neutral  ███░░░░░░  18%    │  Neutral  ██░░░░░░░  12%  │
+│  Sad      ██░░░░░░░  10%    │  Sad      █░░░░░░░░   6%  │
+│  Surprise ███░░░░░░  20%    │  Surprise ███░░░░░░  15%  │
+└─────────────────────────────────────────────────────────┘
+```
 
 ### 12.4 Resultados Generados
 

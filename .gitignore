@@ -111,11 +111,8 @@ myenv/
 .DS_Store
 Thumbs.db
 
-# Project specific
+# Project specific - Modelos entrenados (pesados)
 models/*.pkl
-results/*.png
-results/*.json
-results/*.txt
 
 # Temporary files
 *.tmp
