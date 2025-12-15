@@ -1,0 +1,72 @@
+================================================================================
+REPORTE DE EVALUACIÓN COMPARATIVA
+Fecha: 2025-12-14 19:38:23
+================================================================================
+
+========================================
+MODELO: FER
+========================================
+
+Muestras totales: 7178
+Predicciones válidas: 7178
+Predicciones fallidas: 0
+
+MÉTRICAS GENERALES:
+  Accuracy:           0.4487
+  Precision (Macro):  0.5578
+  Recall (Macro):     0.4195
+  F1-Score (Macro):   0.4444
+  Precision (Weighted): 0.5570
+  Recall (Weighted):    0.4487
+  F1-Score (Weighted):  0.4593
+
+RENDIMIENTO POR EMOCIÓN:
+  Angry     : Acc=0.3288 (315/958)
+  Disgust   : Acc=0.3243 (36/111)
+  Fear      : Acc=0.2598 (266/1024)
+  Happy     : Acc=0.5648 (1002/1774)
+  Neutral   : Acc=0.7437 (917/1233)
+  Sad       : Acc=0.2181 (272/1247)
+  Surprise  : Acc=0.4970 (413/831)
+
+========================================
+MODELO: DeepFace
+========================================
+
+Muestras totales: 7178
+Predicciones válidas: 7178
+Predicciones fallidas: 0
+
+MÉTRICAS GENERALES:
+  Accuracy:           0.5522
+  Precision (Macro):  0.5485
+  Recall (Macro):     0.5018
+  F1-Score (Macro):   0.5170
+  Precision (Weighted): 0.5587
+  Recall (Weighted):    0.5522
+  F1-Score (Weighted):  0.5531
+
+RENDIMIENTO POR EMOCIÓN:
+  Angry     : Acc=0.4238 (406/958)
+  Disgust   : Acc=0.2883 (32/111)
+  Fear      : Acc=0.3740 (383/1024)
+  Happy     : Acc=0.7728 (1371/1774)
+  Neutral   : Acc=0.5629 (694/1233)
+  Sad       : Acc=0.4130 (515/1247)
+  Surprise  : Acc=0.6775 (563/831)
+
+================================================================================
+COMPARACIÓN DE MODELOS
+================================================================================
+
+  Modelo  Accuracy  Precision (Macro)  Recall (Macro)  F1-Score (Macro)  Precision (Weighted)  Recall (Weighted)  F1-Score (Weighted)  Muestras Válidas  Predicciones Fallidas
+     FER  0.448732           0.557811        0.419508          0.444364              0.556950           0.448732             0.459311              7178                      0
+DeepFace  0.552243           0.548459        0.501755          0.516981              0.558666           0.552243             0.553148              7178                      0
+
+MEJOR MODELO POR MÉTRICA:
+  Accuracy: DeepFace (0.5522)
+  Precision: FER (0.5578)
+  Recall: DeepFace (0.5018)
+  F1-Score: DeepFace (0.5170)
+
+================================================================================

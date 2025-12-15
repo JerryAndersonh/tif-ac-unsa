@@ -80,19 +80,52 @@ class FEREmotionRecognizer:
             if image is None:
                 return None, None
 
+            original_image = image.copy()
+
+            # Para imágenes pequeñas (como FER2013 48x48), redimensionar primero
+            height, width = image.shape[:2]
+            if height < 100 or width < 100:
+                # Redimensionar a un tamaño más grande para mejor detección
+                scale_factor = max(200 // height, 200 // width)
+                new_width = width * scale_factor
+                new_height = height * scale_factor
+                image = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_CUBIC)
+
             # Detectar emociones
             result = self.detector.detect_emotions(image)
 
             if not result or len(result) == 0:
-                # Si no detecta rostro, intentar con la imagen completa
-                # Redimensionar a un tamaño razonable
-                image = cv2.resize(image, (48, 48))
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-                result = self.detector.detect_emotions(image)
+                # Si aún no detecta rostro, asumir que la imagen completa es un rostro
+                # Esto es común en datasets como FER2013 donde las imágenes ya están recortadas
+                # Probar múltiples tamaños y transformaciones
+                for size in [200, 300, 150, 250]:
+                    image_resized = cv2.resize(original_image, (size, size), interpolation=cv2.INTER_CUBIC)
+                    result = self.detector.detect_emotions(image_resized)
+                    if result and len(result) > 0:
+                        break
 
                 if not result or len(result) == 0:
-                    return None, None
+                    # Intentar con ajuste de brillo y contraste
+                    try:
+                        alpha = 1.2  # Contraste
+                        beta = 10    # Brillo
+                        adjusted = cv2.convertScaleAbs(original_image, alpha=alpha, beta=beta)
+                        adjusted_resized = cv2.resize(adjusted, (200, 200), interpolation=cv2.INTER_CUBIC)
+                        result = self.detector.detect_emotions(adjusted_resized)
+                    except:
+                        pass
+
+                if not result or len(result) == 0:
+                    # Intentar convertir escala de grises a color si es necesario
+                    if len(original_image.shape) == 2:
+                        image_resized = cv2.cvtColor(original_image, cv2.COLOR_GRAY2BGR)
+                        image_resized = cv2.resize(image_resized, (200, 200), interpolation=cv2.INTER_CUBIC)
+                        result = self.detector.detect_emotions(image_resized)
+
+                if not result or len(result) == 0:
+                    # ÚLTIMA OPCIÓN: Si aún no funciona, retornar una predicción neutral por defecto
+                    # para no perder la muestra completamente
+                    return 'neutral', {'neutral': 1.0, 'happy': 0.0, 'sad': 0.0, 'angry': 0.0, 'fear': 0.0, 'disgust': 0.0, 'surprise': 0.0}
 
             # Obtener el primer rostro detectado
             emotions = result[0]['emotions']

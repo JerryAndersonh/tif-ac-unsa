@@ -62,7 +62,11 @@ def run_comparison(sample_size=100, skip_fer=False, skip_deepface=False):
     data_loader.print_dataset_info()
 
     # Cargar imágenes de test
-    print(f"\nCargando {sample_size} imágenes por emoción para evaluación...")
+    if sample_size is None:
+        print("\nCargando TODAS las imágenes disponibles para evaluación...")
+    else:
+        print(f"\nCargando {sample_size} imágenes por emoción para evaluación...")
+
     test_images, test_labels = data_loader.load_test_images(
         sample_size_per_emotion=sample_size
     )
@@ -199,11 +203,23 @@ def main():
         action='store_true',
         help='Saltar evaluación de DeepFace'
     )
+    parser.add_argument(
+        '--all', '-a',
+        action='store_true',
+        help='Usar TODAS las imágenes del dataset (7,178 imágenes de test)'
+    )
 
     args = parser.parse_args()
 
     if args.quick:
         run_quick_test()
+    elif args.all:
+        print("\n*** MODO COMPLETO: Usando TODAS las imágenes del dataset ***\n")
+        run_comparison(
+            sample_size=None,  # None = usar todas las imágenes
+            skip_fer=args.skip_fer,
+            skip_deepface=args.skip_deepface
+        )
     else:
         run_comparison(
             sample_size=args.sample_size,

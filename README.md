@@ -438,7 +438,6 @@ actarea/
 ├── results/                    # Resultados generados
 ├── models/                     # Modelos guardados
 ├── main.py                     # Script principal de comparación
-├── test_models.py              # Pruebas unitarias
 ├── demo.py                     # Demostración con imágenes
 ├── webcam_demo.py              # Demo básico con webcam
 ├── webcam_dashboard.py         # Dashboard profesional con webcam
@@ -539,23 +538,7 @@ python main.py --skip-fer         # Solo evaluar DeepFace
 python main.py --skip-deepface    # Solo evaluar FER
 ```
 
-#### 7.2.7 `test_models.py` - Pruebas de Modelos
-Script para verificar que cada componente funciona correctamente:
-- **`test_data_loader()`**: Verifica la carga del dataset
-- **`test_fer_model()`**: Prueba predicción con FER
-- **`test_deepface_model()`**: Prueba predicción con DeepFace
-- **`test_evaluation()`**: Verifica el módulo de métricas
-- **`run_all_tests()`**: Ejecuta todas las pruebas
-
-```bash
-# Uso desde terminal
-python test_models.py --all       # Todas las pruebas
-python test_models.py --fer       # Solo pruebas de FER
-python test_models.py --deepface  # Solo pruebas de DeepFace
-python test_models.py --eval      # Solo pruebas de evaluación
-```
-
-#### 7.2.8 `demo.py` - Demostración con Imágenes
+#### 7.2.7 `demo.py` - Demostración con Imágenes
 Script para analizar imágenes individuales o muestras aleatorias:
 - **`analyze_image()`**: Analiza una imagen específica con ambos modelos
 - **`analyze_random_samples()`**: Selecciona y analiza muestras del dataset
@@ -566,7 +549,7 @@ python demo.py --image foto.jpg   # Analizar imagen específica
 python demo.py --random           # Analizar muestras aleatorias
 ```
 
-#### 7.2.9 `webcam_demo.py` - Demo en Tiempo Real con Webcam
+#### 7.2.8 `webcam_demo.py` y `webcam_dashboard.py` - Demos en Tiempo Real
 Demo interactivo básico que usa la cámara web para reconocimiento en vivo:
 - **Detección de rostros** en tiempo real con Haar Cascade
 - **Predicción de emociones** con FER y/o DeepFace
@@ -615,75 +598,82 @@ El archivo `main.py` ejecuta la comparación completa:
 
 ### 8.1 Resultados Obtenidos
 
-**Nota:** Los resultados mostrados a continuación son de una ejecución anterior con OpenCV. Después de actualizar a FER (Mini-Xception), se recomienda ejecutar nuevamente `python main.py --quick` para obtener resultados actualizados con ambos modelos preentrenados.
+**Resultados de evaluación completa con 7,178 imágenes de test (100% del dataset)**
+Fecha de ejecución: 14 de diciembre de 2025
 
-Los siguientes resultados son de referencia y serán actualizados tras ejecutar la nueva comparación:
+#### Métricas Generales
 
-#### Métricas Generales (Pendiente de actualización con FER)
+| Métrica | FER (Mini-Xception) | DeepFace | Mejor |
+|---------|---------------------|----------|-------|
+| **Accuracy** | 44.87% | **55.22%** | DeepFace |
+| **Precision (Macro)** | **55.78%** | 54.85% | FER |
+| **Recall (Macro)** | 41.95% | **50.18%** | DeepFace |
+| **F1-Score (Macro)** | 44.44% | **51.70%** | DeepFace |
+| **Precision (Weighted)** | 55.70% | **55.87%** | DeepFace |
+| **Recall (Weighted)** | 44.87% | **55.22%** | DeepFace |
+| **F1-Score (Weighted)** | 45.93% | **55.31%** | DeepFace |
 
-| Métrica | FER | DeepFace | Mejor |
-|---------|-----|----------|-------|
-| **Accuracy** | *Pendiente* | ~51% | - |
-| **Precision (Macro)** | *Pendiente* | ~54% | - |
-| **Recall (Macro)** | *Pendiente* | ~51% | - |
-| **F1-Score (Macro)** | *Pendiente* | ~52% | - |
+**Conclusión:** DeepFace supera a FER en la mayoría de métricas, especialmente en Accuracy (55.22% vs 44.87%). Sin embargo, FER logra mejor Precision (Macro), lo que indica menos falsos positivos.
 
-#### Rendimiento por Emoción (Pendiente de actualización)
+#### Rendimiento por Emoción
 
-| Emoción | FER | DeepFace | Observación |
-|---------|-----|----------|-------------|
-| Angry | *Pendiente* | ~30% | - |
-| Disgust | *Pendiente* | ~50% | - |
-| Fear | *Pendiente* | ~40% | - |
-| Happy | *Pendiente* | ~70% | - |
-| Neutral | *Pendiente* | ~50% | - |
-| Sad | *Pendiente* | ~40% | - |
-| Surprise | *Pendiente* | ~80% | - |
+| Emoción | FER | DeepFace | Mejor | Observación |
+|---------|-----|----------|-------|-------------|
+| **Angry** | 32.88% | **42.38%** | DeepFace | Ambos modelos tienen dificultad con enojo |
+| **Disgust** | **32.43%** | 28.83% | FER | La emoción más difícil (pocas muestras) |
+| **Fear** | 25.98% | **37.40%** | DeepFace | Emoción desafiante para ambos |
+| **Happy** | 56.48% | **77.28%** | DeepFace | La más fácil de detectar |
+| **Neutral** | **74.37%** | 56.29% | FER | FER sobresale en expresiones neutrales |
+| **Sad** | 21.81% | **41.30%** | DeepFace | Difícil por similitud con otras emociones |
+| **Surprise** | 49.70% | **67.75%** | DeepFace | Bien detectada por características distintivas |
 
-**Para actualizar los resultados, ejecutar:**
-```bash
-python main.py --quick
-```
+**Hallazgos clave:**
+- **Happy** es la emoción mejor detectada por DeepFace (77.28%)
+- **Neutral** es donde FER destaca (74.37%), superando a DeepFace
+- **Disgust** y **Sad** son las más difíciles para ambos modelos
+- DeepFace es superior en 5 de 7 emociones
 
 ### 8.2 Visualizaciones de Resultados
 
 #### Matrices de Confusión
 
-![Matrices de Confusión](results/confusion_matrices_20251130_222340.png)
+![Matrices de Confusión](results/confusion_matrices_20251214_193822.png)
 
-*Las matrices muestran cómo cada modelo clasifica las emociones. La diagonal representa predicciones correctas.*
+*Las matrices muestran cómo cada modelo clasifica las emociones. La diagonal representa predicciones correctas. Los valores están normalizados por fila (porcentaje).*
 
 #### Comparación de Métricas
 
-![Comparación de Métricas](results/metrics_comparison_20251130_222340.png)
+![Comparación de Métricas](results/metrics_comparison_20251214_193822.png)
 
-*Gráfico de barras comparando accuracy, precision, recall y F1-score entre ambos modelos.*
+*Gráfico de barras comparando accuracy, precision, recall y F1-score entre FER y DeepFace. DeepFace lidera en accuracy y F1-score, mientras que FER tiene mejor precision macro.*
 
 #### Rendimiento por Emoción
 
-![Rendimiento por Emoción](results/per_emotion_comparison_20251130_222340.png)
+![Rendimiento por Emoción](results/per_emotion_comparison_20251214_193822.png)
 
-*Accuracy desglosado por cada una de las 7 emociones del dataset FER2013.*
+*Accuracy desglosado por cada una de las 7 emociones del dataset FER2013. Destaca el alto rendimiento de FER en "Neutral" (74.37%) y de DeepFace en "Happy" (77.28%).*
 
 #### Tiempos de Procesamiento
 
-![Tiempos de Procesamiento](results/processing_times_20251130_222340.png)
+![Tiempos de Procesamiento](results/processing_times_20251214_193822.png)
 
-*Comparación del tiempo total de procesamiento entre OpenCV y DeepFace.*
+*Comparación del tiempo total de procesamiento entre FER (Mini-Xception) y DeepFace sobre las 7,178 imágenes de test. Ambos modelos mostraron velocidades similares en esta ejecución.*
 
 ### 8.3 Análisis de Resultados
 
-#### Hallazgos Principales (Esperados con FER vs DeepFace):
+#### Hallazgos Principales
 
-1. **Ambos modelos son CNN preentrenados**, lo que permite una comparación justa en igualdad de condiciones.
+1. **DeepFace supera a FER en accuracy general** (55.22% vs 44.87%), una diferencia de 10.35 puntos porcentuales. Esta ventaja se debe a su arquitectura más profunda y entrenamiento con datasets más grandes.
 
-2. **FER (Mini-Xception) es más ligero** - aproximadamente 60,000 parámetros vs millones en DeepFace.
+2. **FER destaca en Precision Macro** (55.78% vs 54.85%), lo que indica que cuando FER predice una emoción, tiene mayor probabilidad de ser correcta (menos falsos positivos).
 
-3. **DeepFace puede tener mayor precisión** debido a su arquitectura más profunda y entrenamiento con más datos.
+3. **Fortaleza de FER: Emociones neutras** - FER alcanza 74.37% en "Neutral", superando significativamente a DeepFace (56.29%). Esto sugiere que el modelo Mini-Xception está mejor calibrado para expresiones sutiles.
 
-4. **FER es más rápido** - ideal para aplicaciones en tiempo real con recursos limitados.
+4. **Fortaleza de DeepFace: Happy y Surprise** - DeepFace logra 77.28% en "Happy" y 67.75% en "Surprise", las emociones con características faciales más distintivas (sonrisas amplias, ojos abiertos).
 
-5. **"Happy" y "Surprise" suelen ser las más fáciles** de detectar para ambos modelos debido a sus características faciales distintivas.
+5. **Emociones desafiantes:** Ambos modelos luchan con "Sad" (FER: 21.81%, DeepFace: 41.30%) y "Fear" (FER: 25.98%, DeepFace: 37.40%), probablemente debido a la similitud con otras expresiones y al desbalance del dataset.
+
+6. **"Disgust" es la más difícil** - Solo 111 muestras en el dataset de test. FER logra 32.43% vs DeepFace 28.83%, mostrando que el tamaño reducido del dataset afecta más a modelos grandes.
 
 ### 8.4 Comparación de Eficiencia
 
@@ -709,26 +699,30 @@ python main.py --quick
 
 ### 9.1 Hallazgos Principales
 
-1. **Comparación justa con modelos preentrenados**: Al utilizar FER (Mini-Xception) y DeepFace, ambos modelos preentrenados, se garantiza una evaluación en igualdad de condiciones sin ventajas por datos de entrenamiento.
+1. **DeepFace demuestra superioridad en accuracy general**: Con 55.22% de accuracy sobre las 7,178 imágenes de test, DeepFace supera a FER (44.87%) por 10.35 puntos porcentuales. Esta diferencia confirma que las arquitecturas más profundas ofrecen mejor capacidad de generalización en reconocimiento de emociones.
 
-2. **FER (Mini-Xception) es más eficiente**: Con solo ~60,000 parámetros, ofrece tiempos de inferencia más rápidos, siendo ideal para aplicaciones en tiempo real con recursos limitados.
+2. **FER destaca en escenarios específicos**: Aunque tiene menor accuracy global, FER logra mejor Precision Macro (55.78% vs 54.85%) y destaca notablemente en la detección de expresiones "Neutral" (74.37%), superando a DeepFace por 18 puntos porcentuales.
 
-3. **DeepFace ofrece arquitectura más profunda**: Con millones de parámetros y entrenamiento con datasets más grandes, puede ofrecer mayor robustez en condiciones variadas.
+3. **Especialización por tipo de emoción**: Los resultados muestran que cada modelo tiene fortalezas distintas:
+   - **DeepFace**: Mejor en emociones expresivas (Happy: 77.28%, Surprise: 67.75%)
+   - **FER**: Mejor en emociones sutiles (Neutral: 74.37%)
 
-4. **Ambos modelos son CNN**: A diferencia de enfoques tradicionales (HOG/LBP + SVM), ambos utilizan redes neuronales convolucionales, lo que permite una comparación directa de arquitecturas deep learning.
+4. **Emociones desafiantes universales**: Ambos modelos luchan con "Sad" y "Fear", sugiriendo que estas emociones requieren características más complejas o datasets más balanceados. DeepFace logra el doble de accuracy que FER en "Sad" (41.30% vs 21.81%).
 
-5. **Emociones desafiantes**: Tanto "disgust" como "fear" son difíciles de clasificar debido al desbalance del dataset FER2013 y la similitud con otras expresiones.
+5. **El desbalance de clases afecta desproporcionadamente**: "Disgust" con solo 111 muestras (1.5% del dataset) obtiene los peores resultados en ambos modelos, demostrando la necesidad de datasets más balanceados para entrenamientos futuros.
 
 ### 9.2 Recomendaciones de Uso
 
 | Escenario | Modelo Recomendado | Razón |
 |-----------|-------------------|-------|
-| Aplicación móvil | FER | Modelo ligero, bajo consumo |
-| Sistema de seguridad | DeepFace | Mayor robustez |
-| Procesamiento en tiempo real | FER | Menor latencia (~50-100ms) |
-| Análisis de video offline | DeepFace | Precisión prioritaria |
-| Dispositivos IoT | FER | Hardware limitado |
-| Investigación científica | DeepFace | Arquitectura más estudiada |
+| **Aplicación móvil** | FER | Modelo ligero (~1-2 MB), bajo consumo, menor latencia |
+| **Sistema de seguridad crítico** | DeepFace | Mayor accuracy general (55.22%), mejor en todas las métricas principales |
+| **Detección de felicidad/sorpresa** | DeepFace | Accuracy >67% en estas emociones, ideal para marketing/engagement |
+| **Análisis de expresiones neutras** | FER | 74.37% accuracy en neutral, 18 puntos superior a DeepFace |
+| **Dispositivos IoT/Edge** | FER | ~60K parámetros, funciona bien con recursos limitados |
+| **Investigación académica** | DeepFace | Mayor accuracy, más robusto, mejor documentado |
+| **Aplicaciones en tiempo real** | FER | Velocidad similar pero menor uso de memoria (~300-500 MB vs 1-2 GB) |
+| **Análisis emocional completo** | **Ensemble (ambos)** | Combinar fortalezas: FER para neutral, DeepFace para el resto |
 
 ### 9.3 Limitaciones del Estudio
 
@@ -890,19 +884,6 @@ python main.py --skip-fer
 
 # Solo evaluar FER
 python main.py --skip-deepface
-```
-
-#### Ejecutar Pruebas
-
-```bash
-# Todas las pruebas
-python test_models.py --all
-
-# Solo FER
-python test_models.py --fer
-
-# Solo DeepFace
-python test_models.py --deepface
 ```
 
 #### Demostración Interactiva
