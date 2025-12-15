@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
 """
 Dashboard Profesional de Reconocimiento de Emociones en Tiempo Real.
-Combina OpenCV y DeepFace con visualización estilo corporativo.
-
-Basado en el diseño visual de dashboard con panel inferior.
+Compara FER (Mini-Xception) y DeepFace - Ambos modelos PREENTRENADOS.
 
 Uso:
     python webcam_dashboard.py              # Ambos modelos
-    python webcam_dashboard.py --opencv     # Solo OpenCV (más rápido)
-    python webcam_dashboard.py --deepface   # Solo DeepFace (más preciso)
+    python webcam_dashboard.py --fer        # Solo FER (más rápido)
+    python webcam_dashboard.py --deepface   # Solo DeepFace
 
 Controles:
     q - Salir
     s - Capturar screenshot
-    m - Cambiar modelo activo
 """
 import os
 import sys
@@ -87,95 +84,86 @@ def rounded_rectangle(img, top_left, bottom_right, color, radius=10, thickness=-
 class EmotionDashboard:
     """Dashboard profesional de reconocimiento de emociones."""
 
-    def __init__(self, use_opencv=True, use_deepface=True):
-        self.use_opencv = use_opencv
+    def __init__(self, use_fer=True, use_deepface=True):
+        self.use_fer = use_fer
         self.use_deepface = use_deepface
 
         # Modelos
-        self.opencv_model = None
-        self.deepface_model = None
-
-        # Haar cascade para detección
-        cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
-        self.face_cascade = cv2.CascadeClassifier(cascade_path)
+        self.fer_model = None
 
         # Estado de emociones suavizadas
-        self.smoothed_opencv = {emo: 0.0 for emo in EMOTIONS}
+        self.smoothed_fer = {emo: 0.0 for emo in EMOTIONS}
         self.smoothed_deepface = {emo: 0.0 for emo in EMOTIONS}
 
         # Emociones dominantes
-        self.dominant_opencv = "Detectando..."
+        self.dominant_fer = "Detectando..."
         self.dominant_deepface = "Detectando..."
 
         # Región facial
         self.face_region = None
+        self.fer_face_box = None
 
         # Contadores
         self.frame_count = 0
         self.fps = 0.0
-        self.last_fps_time = time.time()
 
         # Cargar modelos
         self._load_models()
 
     def _load_models(self):
-        """Carga los modelos de reconocimiento."""
-        if self.use_opencv:
-            print("Cargando modelo OpenCV...")
+        """Carga los modelos de reconocimiento (ambos preentrenados)."""
+        if self.use_fer:
+            print("Cargando modelo FER (Mini-Xception)...")
             try:
-                from src.opencv_model import OpenCVEmotionRecognizer
-                self.opencv_model = OpenCVEmotionRecognizer()
-                if not self.opencv_model.load_model():
-                    print("  Entrenando modelo OpenCV (espera unos minutos)...")
-                    self.opencv_model.train(max_samples_per_class=300)
-                print("  ✓ OpenCV listo")
+                # Intentar diferentes formas de importar FER
+                try:
+                    from fer import FER
+                except ImportError:
+                    try:
+                        from fer.fer import FER
+                    except ImportError:
+                        import fer
+                        FER = fer.FER
+                self.fer_model = FER(mtcnn=False)
+                print("  ✓ FER listo (modelo preentrenado)")
             except Exception as e:
-                print(f"  ✗ Error OpenCV: {e}")
-                self.use_opencv = False
+                print(f"  ✗ Error FER: {e}")
+                print("  Instala con: pip install fer")
+                self.use_fer = False
 
         if self.use_deepface:
             print("Cargando modelo DeepFace...")
             try:
                 from deepface import DeepFace
-                # Test rápido para cargar el modelo
-                print("  ✓ DeepFace listo")
+                print("  ✓ DeepFace listo (modelo preentrenado)")
             except Exception as e:
                 print(f"  ✗ Error DeepFace: {e}")
                 self.use_deepface = False
 
-    def detect_faces(self, frame):
-        """Detecta rostros en el frame."""
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = self.face_cascade.detectMultiScale(
-            gray, scaleFactor=1.1, minNeighbors=5, minSize=(60, 60)
-        )
-        return faces
-
-    def predict_opencv(self, face_img):
-        """Predice emoción con OpenCV."""
-        if self.opencv_model is None:
-            return None, {}
+    def predict_fer(self, frame):
+        """Predice emoción con FER (Mini-Xception)."""
+        if self.fer_model is None:
+            return None, {}, None
 
         try:
-            if len(face_img.shape) == 3:
-                gray = cv2.cvtColor(face_img, cv2.COLOR_BGR2GRAY)
-            else:
-                gray = face_img
+            result = self.fer_model.detect_emotions(frame)
 
-            gray = cv2.resize(gray, (48, 48))
-            gray = cv2.equalizeHist(gray)
+            if not result or len(result) == 0:
+                return None, {}, None
 
-            features = self.opencv_model.extract_features(gray)
-            features_scaled = self.opencv_model.scaler.transform(features.reshape(1, -1))
-            prediction = self.opencv_model.classifier.predict(features_scaled)[0]
-            probabilities = self.opencv_model.classifier.predict_proba(features_scaled)[0]
+            # Primer rostro
+            face_data = result[0]
+            emotions = face_data['emotions']
+            box = face_data['box']  # (x, y, w, h)
 
-            emotion = EMOTIONS[prediction]
-            probs = {emo: prob * 100 for emo, prob in zip(EMOTIONS, probabilities)}
+            dominant = max(emotions, key=emotions.get)
 
-            return emotion, probs
+            # Convertir probabilidades a porcentaje
+            probs = {k: v * 100 for k, v in emotions.items()}
+
+            return dominant, probs, box
         except:
-            return None, {}
+            return None, {}, None
 
     def predict_deepface(self, frame):
         """Predice emoción con DeepFace."""
@@ -198,10 +186,9 @@ class EmotionDashboard:
             dominant = result.get('dominant_emotion', 'neutral').lower()
             emotions = result.get('emotion', {})
 
-            # Convertir a diccionario con nombres en minúsculas
             probs = {k.lower(): float(v) for k, v in emotions.items()}
 
-            # Obtener región facial
+            # Región facial
             region = result.get('region', None)
             if region and region.get('w', 0) > 30:
                 self.face_region = region
@@ -219,8 +206,16 @@ class EmotionDashboard:
 
     def draw_face_rectangle(self, frame):
         """Dibuja rectángulo alrededor del rostro."""
-        if self.face_region and self.face_region.get('w', 0) > 0:
-            # Escalar coordenadas al tamaño del frame
+        # Usar box de FER si está disponible (más preciso)
+        if self.fer_face_box is not None and len(self.fer_face_box) == 4:
+            x, y, w, h = self.fer_face_box
+            x = max(0, x - 8)
+            y = max(0, y - 8)
+            x2 = min(frame.shape[1], x + w + 16)
+            y2 = min(frame.shape[0], y + h + 16)
+            rounded_rectangle(frame, (x, y), (x2, y2), (60, 180, 255), radius=12, thickness=3)
+        elif self.face_region and self.face_region.get('w', 0) > 0:
+            # Fallback a DeepFace region
             scale_x = frame.shape[1] / 640
             scale_y = frame.shape[0] / 480
 
@@ -238,16 +233,17 @@ class EmotionDashboard:
 
     def draw_video_overlay(self, frame):
         """Dibuja información sobre el video."""
-        # Emoción dominante
+        y_pos = 40
+
+        if self.use_fer:
+            text = f"FER: {self.dominant_fer.capitalize()}"
+            color = COLORS.get(self.dominant_fer, (255, 255, 255))
+            cv2.putText(frame, text, (20, y_pos), cv2.FONT_HERSHEY_DUPLEX, 1.0, color, 2)
+            y_pos += 40
+
         if self.use_deepface:
             text = f"DeepFace: {self.dominant_deepface.capitalize()}"
             color = COLORS.get(self.dominant_deepface, (255, 255, 255))
-            cv2.putText(frame, text, (20, 40), cv2.FONT_HERSHEY_DUPLEX, 1.0, color, 2)
-
-        if self.use_opencv:
-            text = f"OpenCV: {self.dominant_opencv.capitalize()}"
-            color = COLORS.get(self.dominant_opencv, (255, 255, 255))
-            y_pos = 80 if self.use_deepface else 40
             cv2.putText(frame, text, (20, y_pos), cv2.FONT_HERSHEY_DUPLEX, 1.0, color, 2)
 
         # FPS
@@ -269,16 +265,16 @@ class EmotionDashboard:
         y_start = 50
         y_spacing = 32
 
-        # === PANEL OPENCV (izquierda) ===
-        if self.use_opencv:
-            # Header OpenCV
-            rounded_rectangle(panel, (20, 10), (350, 45), (20, 60, 100), radius=8)
-            cv2.putText(panel, "OpenCV (Machine Learning)",
-                        (35, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (100, 200, 255), 2)
+        # === PANEL FER (izquierda) ===
+        if self.use_fer:
+            # Header FER
+            rounded_rectangle(panel, (20, 10), (380, 45), (20, 60, 100), radius=8)
+            cv2.putText(panel, "FER (Mini-Xception) - Preentrenado",
+                        (35, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (100, 200, 255), 2)
 
             for idx, emo in enumerate(EMOTIONS):
                 y_pos = y_start + idx * y_spacing
-                value = self.smoothed_opencv[emo]
+                value = self.smoothed_fer[emo]
                 value_clamped = max(0.0, min(100.0, value))
                 bar_width = int((value_clamped / 100.0) * bar_max_width)
 
@@ -302,12 +298,12 @@ class EmotionDashboard:
 
         # === PANEL DEEPFACE (derecha) ===
         if self.use_deepface:
-            offset_x = 640 if self.use_opencv else 20
+            offset_x = 640 if self.use_fer else 20
 
             # Header DeepFace
             rounded_rectangle(panel, (offset_x, 10), (offset_x + 380, 45), (60, 20, 100), radius=8)
-            cv2.putText(panel, "DeepFace (Deep Learning)",
-                        (offset_x + 15, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 150, 200), 2)
+            cv2.putText(panel, "DeepFace - Preentrenado",
+                        (offset_x + 15, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 150, 200), 2)
 
             for idx, emo in enumerate(EMOTIONS):
                 y_pos = y_start + idx * y_spacing
@@ -334,7 +330,7 @@ class EmotionDashboard:
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (220, 220, 220), 1)
 
         # Footer
-        footer_text = "Q=Salir | S=Screenshot | OpenCV vs DeepFace - Comparacion en Tiempo Real"
+        footer_text = "Q=Salir | S=Screenshot | FER vs DeepFace - Ambos Preentrenados"
         cv2.putText(panel, footer_text, (20, PANEL_HEIGHT - 15),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (150, 150, 150), 1)
 
@@ -350,7 +346,8 @@ class EmotionDashboard:
     def run(self):
         """Ejecuta el dashboard."""
         print("\n" + "="*70)
-        print("  DASHBOARD DE EMOCIONES - OpenCV vs DeepFace")
+        print("  DASHBOARD DE EMOCIONES - FER vs DeepFace")
+        print("  Ambos modelos PREENTRENADOS (comparación justa)")
         print("="*70)
         print("  Controles:")
         print("    Q - Salir")
@@ -364,6 +361,7 @@ class EmotionDashboard:
 
         if not cap.isOpened():
             print("Error: No se pudo abrir la webcam")
+            print("Asegúrate de ejecutar desde Windows PowerShell, no WSL")
             return
 
         print("Webcam iniciada. Presiona 'Q' para salir.\n")
@@ -373,6 +371,7 @@ class EmotionDashboard:
 
             ret, frame = cap.read()
             if not ret:
+                print("Error leyendo frame de la cámara")
                 break
 
             # Redimensionar y voltear
@@ -381,16 +380,13 @@ class EmotionDashboard:
 
             # Analizar cada N frames
             if self.frame_count % ANALYZE_EVERY_N_FRAMES == 0:
-                # OpenCV
-                if self.use_opencv:
-                    faces = self.detect_faces(frame)
-                    if len(faces) > 0:
-                        x, y, w, h = faces[0]
-                        face_img = frame[y:y+h, x:x+w]
-                        emotion, probs = self.predict_opencv(face_img)
-                        if emotion:
-                            self.dominant_opencv = emotion
-                            self.update_smoothed(probs, self.smoothed_opencv)
+                # FER
+                if self.use_fer:
+                    emotion, probs, box = self.predict_fer(frame)
+                    if emotion:
+                        self.dominant_fer = emotion
+                        self.update_smoothed(probs, self.smoothed_fer)
+                        self.fer_face_box = box
 
                 # DeepFace
                 if self.use_deepface:
@@ -410,7 +406,7 @@ class EmotionDashboard:
             combined = np.vstack([frame, panel])
 
             # Mostrar
-            cv2.imshow("Dashboard de Emociones - OpenCV vs DeepFace", combined)
+            cv2.imshow("Dashboard de Emociones - FER vs DeepFace (Preentrenados)", combined)
 
             # Controles
             key = cv2.waitKey(1) & 0xFF
@@ -433,19 +429,23 @@ class EmotionDashboard:
 
 def main():
     parser = argparse.ArgumentParser(description='Dashboard de emociones en tiempo real')
-    parser.add_argument('--opencv', '-o', action='store_true', help='Solo usar OpenCV')
+    parser.add_argument('--fer', '-f', action='store_true', help='Solo usar FER')
     parser.add_argument('--deepface', '-d', action='store_true', help='Solo usar DeepFace')
+    parser.add_argument('--camera', '-c', type=int, default=0, help='Índice de cámara (default: 0)')
 
     args = parser.parse_args()
 
-    if args.opencv and not args.deepface:
-        use_opencv, use_deepface = True, False
-    elif args.deepface and not args.opencv:
-        use_opencv, use_deepface = False, True
-    else:
-        use_opencv, use_deepface = True, True
+    global CAM_INDEX
+    CAM_INDEX = args.camera
 
-    dashboard = EmotionDashboard(use_opencv=use_opencv, use_deepface=use_deepface)
+    if args.fer and not args.deepface:
+        use_fer, use_deepface = True, False
+    elif args.deepface and not args.fer:
+        use_fer, use_deepface = False, True
+    else:
+        use_fer, use_deepface = True, True
+
+    dashboard = EmotionDashboard(use_fer=use_fer, use_deepface=use_deepface)
     dashboard.run()
 
 

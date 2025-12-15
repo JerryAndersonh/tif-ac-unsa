@@ -10,7 +10,7 @@ import argparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from src.config import TEST_DIR, EMOTIONS
-from src.opencv_model import OpenCVEmotionRecognizer
+from src.fer_model import FEREmotionRecognizer
 from src.deepface_model import DeepFaceEmotionRecognizer
 
 
@@ -30,23 +30,19 @@ def analyze_image(image_path):
         print(f"Error: No se encontró la imagen {image_path}")
         return
 
-    # OpenCV
-    print("\n--- MODELO OPENCV ---")
+    # FER (Mini-Xception)
+    print("\n--- MODELO FER (Mini-Xception) ---")
     try:
-        opencv_model = OpenCVEmotionRecognizer()
-        if not opencv_model.load_model():
-            print("Entrenando modelo OpenCV (esto puede tomar unos minutos)...")
-            opencv_model.train(max_samples_per_class=200)
-
-        pred_opencv, probs_opencv = opencv_model.predict(image_path)
-        print(f"Emoción detectada: {pred_opencv}")
-        if probs_opencv:
+        fer_model = FEREmotionRecognizer()
+        pred_fer, probs_fer = fer_model.predict(image_path)
+        print(f"Emoción detectada: {pred_fer}")
+        if probs_fer:
             print("Probabilidades:")
-            for emotion, prob in sorted(probs_opencv.items(), key=lambda x: x[1], reverse=True):
+            for emotion, prob in sorted(probs_fer.items(), key=lambda x: x[1], reverse=True):
                 bar = "█" * int(prob * 30)
                 print(f"  {emotion:10s}: {prob:.4f} {bar}")
     except Exception as e:
-        print(f"Error con OpenCV: {e}")
+        print(f"Error con FER: {e}")
 
     # DeepFace
     print("\n--- MODELO DEEPFACE ---")
@@ -76,11 +72,7 @@ def analyze_random_samples():
     # Cargar modelos
     print("\nCargando modelos...")
 
-    opencv_model = OpenCVEmotionRecognizer()
-    if not opencv_model.load_model():
-        print("Entrenando modelo OpenCV...")
-        opencv_model.train(max_samples_per_class=200)
-
+    fer_model = FEREmotionRecognizer()
     deepface_model = DeepFaceEmotionRecognizer()
 
     # Seleccionar muestras
@@ -99,10 +91,10 @@ def analyze_random_samples():
             print(f"Archivo: {sample}")
             print("-" * 50)
 
-            # OpenCV
-            pred_cv, _ = opencv_model.predict(img_path)
-            match_cv = "✓" if pred_cv == emotion else "✗"
-            print(f"OpenCV:   {pred_cv:10s} {match_cv}")
+            # FER
+            pred_fer, _ = fer_model.predict(img_path)
+            match_fer = "✓" if pred_fer == emotion else "✗"
+            print(f"FER:      {pred_fer:10s} {match_fer}")
 
             # DeepFace
             pred_df, _ = deepface_model.predict(img_path)

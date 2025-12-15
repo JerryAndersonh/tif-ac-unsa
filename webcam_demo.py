@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 """
 Demo de reconocimiento de emociones en tiempo real usando webcam.
-Compara los resultados de OpenCV y DeepFace en vivo.
+Compara los resultados de FER y DeepFace en vivo.
 
 Uso:
     python webcam_demo.py              # Usar ambos modelos
-    python webcam_demo.py --opencv     # Solo OpenCV
+    python webcam_demo.py --fer        # Solo FER
     python webcam_demo.py --deepface   # Solo DeepFace
 
 Controles:
     q - Salir
     s - Capturar screenshot
-    m - Cambiar modo de visualización
 """
 import os
 import sys
@@ -28,19 +27,19 @@ from src.config import RESULTS_DIR, EMOTIONS
 class WebcamEmotionDemo:
     """Demo de reconocimiento de emociones en tiempo real."""
 
-    def __init__(self, use_opencv=True, use_deepface=True):
+    def __init__(self, use_fer=True, use_deepface=True):
         """
         Inicializa el demo.
 
         Args:
-            use_opencv: Usar modelo OpenCV
+            use_fer: Usar modelo FER
             use_deepface: Usar modelo DeepFace
         """
-        self.use_opencv = use_opencv
+        self.use_fer = use_fer
         self.use_deepface = use_deepface
 
         # Modelos
-        self.opencv_model = None
+        self.fer_model = None
         self.deepface_model = None
 
         # Haar cascade para detección de rostros
@@ -64,7 +63,7 @@ class WebcamEmotionDemo:
         self.last_time = time.time()
 
         # Resultados de predicción (para evitar calcular cada frame)
-        self.opencv_result = None
+        self.fer_result = None
         self.deepface_result = None
         self.prediction_interval = 5  # Predecir cada N frames
 
@@ -72,18 +71,15 @@ class WebcamEmotionDemo:
 
     def _load_models(self):
         """Carga los modelos necesarios."""
-        if self.use_opencv:
-            print("Cargando modelo OpenCV...")
+        if self.use_fer:
+            print("Cargando modelo FER (Mini-Xception)...")
             try:
-                from src.opencv_model import OpenCVEmotionRecognizer
-                self.opencv_model = OpenCVEmotionRecognizer()
-                if not self.opencv_model.load_model():
-                    print("Entrenando modelo OpenCV (esto tomará unos minutos)...")
-                    self.opencv_model.train(max_samples_per_class=300)
-                print("Modelo OpenCV listo.")
+                from fer import FER
+                self.fer_model = FER(mtcnn=False)
+                print("Modelo FER listo.")
             except Exception as e:
-                print(f"Error cargando OpenCV: {e}")
-                self.use_opencv = False
+                print(f"Error cargando FER: {e}")
+                self.use_fer = False
 
         if self.use_deepface:
             print("Cargando modelo DeepFace...")
@@ -114,32 +110,19 @@ class WebcamEmotionDemo:
         )
         return faces
 
-    def predict_opencv(self, face_img):
-        """Predice emoción usando OpenCV."""
-        if self.opencv_model is None:
+    def predict_fer(self, frame):
+        """Predice emoción usando FER."""
+        if self.fer_model is None:
             return None, None
 
         try:
-            # Convertir a escala de grises si es necesario
-            if len(face_img.shape) == 3:
-                gray = cv2.cvtColor(face_img, cv2.COLOR_BGR2GRAY)
-            else:
-                gray = face_img
+            result = self.fer_model.detect_emotions(frame)
+            if not result or len(result) == 0:
+                return None, None
 
-            # Redimensionar a 48x48
-            gray = cv2.resize(gray, (48, 48))
-            gray = cv2.equalizeHist(gray)
-
-            # Extraer características y predecir
-            features = self.opencv_model.extract_features(gray)
-            features_scaled = self.opencv_model.scaler.transform(features.reshape(1, -1))
-            prediction = self.opencv_model.classifier.predict(features_scaled)[0]
-            probabilities = self.opencv_model.classifier.predict_proba(features_scaled)[0]
-
-            emotion = EMOTIONS[prediction]
-            probs = dict(zip(EMOTIONS, probabilities))
-
-            return emotion, probs
+            emotions = result[0]['emotions']
+            dominant = max(emotions, key=emotions.get)
+            return dominant, emotions
 
         except Exception as e:
             return None, None
@@ -152,7 +135,6 @@ class WebcamEmotionDemo:
         try:
             from deepface import DeepFace
 
-            # DeepFace necesita imagen en formato BGR o path
             result = DeepFace.analyze(
                 img_path=face_img,
                 actions=['emotion'],
@@ -188,8 +170,8 @@ class WebcamEmotionDemo:
 
             # Predecir emociones (solo cada N frames)
             if self.frame_count % self.prediction_interval == 0:
-                if self.use_opencv:
-                    self.opencv_result = self.predict_opencv(face_img)
+                if self.use_fer:
+                    self.fer_result = self.predict_fer(frame)
 
                 if self.use_deepface:
                     self.deepface_result = self.predict_deepface(face_img)
@@ -200,15 +182,15 @@ class WebcamEmotionDemo:
             # Mostrar resultados
             y_offset = y - 10
 
-            if self.use_opencv and self.opencv_result[0]:
-                emotion_cv, probs_cv = self.opencv_result
-                color = self.emotion_colors.get(emotion_cv, (255, 255, 255))
-                text = f"OpenCV: {emotion_cv}"
+            if self.use_fer and self.fer_result and self.fer_result[0]:
+                emotion_fer, probs_fer = self.fer_result
+                color = self.emotion_colors.get(emotion_fer, (255, 255, 255))
+                text = f"FER: {emotion_fer}"
                 cv2.putText(frame, text, (x, y_offset),
                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
                 y_offset -= 25
 
-            if self.use_deepface and self.deepface_result[0]:
+            if self.use_deepface and self.deepface_result and self.deepface_result[0]:
                 emotion_df, probs_df = self.deepface_result
                 color = self.emotion_colors.get(emotion_df, (255, 255, 255))
                 text = f"DeepFace: {emotion_df}"
@@ -238,12 +220,12 @@ class WebcamEmotionDemo:
         # Mostrar probabilidades si hay resultados
         y_pos = 70
 
-        if self.use_opencv and self.opencv_result and self.opencv_result[1]:
-            cv2.putText(frame, "OpenCV:", (w-210, y_pos),
+        if self.use_fer and self.fer_result and self.fer_result[1]:
+            cv2.putText(frame, "FER:", (w-210, y_pos),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1)
             y_pos += 20
 
-            for emotion, prob in sorted(self.opencv_result[1].items(),
+            for emotion, prob in sorted(self.fer_result[1].items(),
                                        key=lambda x: x[1], reverse=True)[:5]:
                 bar_width = int(prob * 150)
                 color = self.emotion_colors.get(emotion, (255, 255, 255))
@@ -355,9 +337,9 @@ def main():
         description='Demo de reconocimiento de emociones con webcam'
     )
     parser.add_argument(
-        '--opencv', '-o',
+        '--fer', '-f',
         action='store_true',
-        help='Usar solo modelo OpenCV'
+        help='Usar solo modelo FER'
     )
     parser.add_argument(
         '--deepface', '-d',
@@ -368,15 +350,15 @@ def main():
     args = parser.parse_args()
 
     # Determinar qué modelos usar
-    if args.opencv and not args.deepface:
-        use_opencv, use_deepface = True, False
-    elif args.deepface and not args.opencv:
-        use_opencv, use_deepface = False, True
+    if args.fer and not args.deepface:
+        use_fer, use_deepface = True, False
+    elif args.deepface and not args.fer:
+        use_fer, use_deepface = False, True
     else:
-        use_opencv, use_deepface = True, True
+        use_fer, use_deepface = True, True
 
     # Ejecutar demo
-    demo = WebcamEmotionDemo(use_opencv=use_opencv, use_deepface=use_deepface)
+    demo = WebcamEmotionDemo(use_fer=use_fer, use_deepface=use_deepface)
     demo.run()
 
 

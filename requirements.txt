@@ -1,5 +1,5 @@
 # Dependencias para el proyecto de reconocimiento facial de emociones
-# Comparación OpenCV vs DeepFace
+# Comparación FER vs DeepFace (ambos modelos preentrenados)
 
 # Core
 numpy>=1.21.0
@@ -11,6 +11,9 @@ Pillow>=8.0.0
 # OpenCV
 opencv-python>=4.5.0
 opencv-contrib-python>=4.5.0
+
+# FER - Modelo preentrenado Mini-Xception
+fer>=22.4.0
 
 # DeepFace y dependencias de deep learning
 deepface>=0.0.79

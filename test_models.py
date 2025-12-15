@@ -6,7 +6,6 @@ Script de prueba individual para los modelos.
 import os
 import sys
 
-# Agregar directorio src al path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from src.config import TEST_DIR, EMOTIONS
@@ -32,23 +31,19 @@ def test_data_loader():
     return True
 
 
-def test_opencv_model():
-    """Prueba el modelo OpenCV."""
+def test_fer_model():
+    """Prueba el modelo FER (Mini-Xception)."""
     print("\n" + "=" * 50)
-    print("PRUEBA: OpenCV Model")
+    print("PRUEBA: FER Model (Mini-Xception)")
     print("=" * 50)
 
     try:
-        from src.opencv_model import OpenCVEmotionRecognizer
+        from src.fer_model import FEREmotionRecognizer
 
-        model = OpenCVEmotionRecognizer()
-
-        # Entrenar con muestra pequeña
-        print("Entrenando con 50 imágenes por clase...")
-        model.train(max_samples_per_class=50)
+        model = FEREmotionRecognizer()
 
         # Probar predicción
-        print("\nProbando predicciones:")
+        print("Probando predicciones:")
         for emotion in ['happy', 'sad', 'angry']:
             test_dir = os.path.join(TEST_DIR, emotion)
             if os.path.exists(test_dir):
@@ -58,11 +53,11 @@ def test_opencv_model():
                     pred, probs = model.predict(img_path)
                     print(f"  Real: {emotion}, Predicho: {pred}")
 
-        print("\nOpenCV: OK")
+        print("\nFER: OK")
         return True
 
     except Exception as e:
-        print(f"Error en OpenCV: {e}")
+        print(f"Error en FER: {e}")
         return False
 
 
@@ -113,11 +108,11 @@ def test_evaluation():
         y_pred_model2 = ['happy', 'happy', 'angry', 'happy', 'sad', 'sad'] * 5
 
         # Evaluar
-        metrics1 = evaluator.evaluate_predictions(y_true, y_pred_model1, 'Modelo1')
-        metrics2 = evaluator.evaluate_predictions(y_true, y_pred_model2, 'Modelo2')
+        metrics1 = evaluator.evaluate_predictions(y_true, y_pred_model1, 'FER')
+        metrics2 = evaluator.evaluate_predictions(y_true, y_pred_model2, 'DeepFace')
 
-        print(f"Modelo1 Accuracy: {metrics1['accuracy']:.4f}")
-        print(f"Modelo2 Accuracy: {metrics2['accuracy']:.4f}")
+        print(f"FER Accuracy: {metrics1['accuracy']:.4f}")
+        print(f"DeepFace Accuracy: {metrics2['accuracy']:.4f}")
 
         # Generar reporte
         print("\nGenerando reporte...")
@@ -143,7 +138,7 @@ def run_all_tests():
     results = {
         'DataLoader': test_data_loader(),
         'Evaluation': test_evaluation(),
-        'OpenCV': test_opencv_model(),
+        'FER': test_fer_model(),
         'DeepFace': test_deepface_model()
     }
 
@@ -167,15 +162,15 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Pruebas de los modelos')
     parser.add_argument('--all', action='store_true', help='Ejecutar todas las pruebas')
-    parser.add_argument('--opencv', action='store_true', help='Probar solo OpenCV')
+    parser.add_argument('--fer', action='store_true', help='Probar solo FER')
     parser.add_argument('--deepface', action='store_true', help='Probar solo DeepFace')
     parser.add_argument('--data', action='store_true', help='Probar solo DataLoader')
     parser.add_argument('--eval', action='store_true', help='Probar solo Evaluation')
 
     args = parser.parse_args()
 
-    if args.opencv:
-        test_opencv_model()
+    if args.fer:
+        test_fer_model()
     elif args.deepface:
         test_deepface_model()
     elif args.data:

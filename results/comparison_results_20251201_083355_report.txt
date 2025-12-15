@@ -1,0 +1,32 @@
+================================================================================
+REPORTE DE EVALUACIÓN COMPARATIVA
+Fecha: 2025-12-01 08:33:56
+================================================================================
+
+========================================
+MODELO: DeepFace
+========================================
+
+Muestras totales: 700
+Predicciones válidas: 700
+Predicciones fallidas: 0
+
+MÉTRICAS GENERALES:
+  Accuracy:           0.4829
+  Precision (Macro):  0.5461
+  Recall (Macro):     0.4829
+  F1-Score (Macro):   0.4823
+  Precision (Weighted): 0.5461
+  Recall (Weighted):    0.4829
+  F1-Score (Weighted):  0.4823
+
+RENDIMIENTO POR EMOCIÓN:
+  Angry     : Acc=0.3400 (34/100)
+  Disgust   : Acc=0.2700 (27/100)
+  Fear      : Acc=0.4100 (41/100)
+  Happy     : Acc=0.7500 (75/100)
+  Neutral   : Acc=0.5500 (55/100)
+  Sad       : Acc=0.4000 (40/100)
+  Surprise  : Acc=0.6600 (66/100)
+
+================================================================================

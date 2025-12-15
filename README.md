@@ -1,19 +1,19 @@
 # Evaluación Comparativa de Modelos de Reconocimiento Facial de Emociones
-## OpenCV vs DeepFace usando el Dataset FER2013
+## FER (Mini-Xception) vs DeepFace usando el Dataset FER2013
 
 ---
 
 ## Resumen / Abstract
 
-Este trabajo presenta una evaluación comparativa entre dos modelos de reconocimiento facial de emociones ampliamente utilizados en visión por computadora: **OpenCV** (Haar Cascade + HOG/LBP + SVM) y **DeepFace** (basado en redes neuronales convolucionales).
+Este trabajo presenta una evaluación comparativa entre dos modelos **preentrenados** de reconocimiento facial de emociones ampliamente utilizados en visión por computadora: **FER (Mini-Xception)** y **DeepFace** (basado en redes neuronales convolucionales).
 
 El objetivo principal es analizar su desempeño sobre el conjunto de datos **FER2013**, que contiene más de 35,000 imágenes etiquetadas con siete emociones básicas: anger (enojo), disgust (disgusto), fear (miedo), happy (felicidad), neutral, sad (tristeza) y surprise (sorpresa).
 
-La metodología comprende la implementación de ambos modelos en Python, la ejecución de pruebas sobre las mismas imágenes y la obtención de métricas de precisión (accuracy), recall y F1-score.
+La metodología comprende la implementación de ambos modelos preentrenados en Python, la ejecución de pruebas sobre las mismas imágenes y la obtención de métricas de precisión (accuracy), recall y F1-score. Al utilizar dos modelos preentrenados, se garantiza una comparación justa en igualdad de condiciones.
 
-Los resultados permiten identificar qué modelo ofrece mayor exactitud y estabilidad al reconocer expresiones faciales humanas. Se concluye que **DeepFace alcanza mejores resultados en términos de precisión**, mientras que **OpenCV muestra mayor eficiencia computacional**, siendo más adecuado para sistemas en tiempo real con recursos limitados.
+Los resultados permiten identificar qué modelo ofrece mayor exactitud y estabilidad al reconocer expresiones faciales humanas. Ambos modelos utilizan redes neuronales convolucionales preentrenadas, lo que permite una comparación directa de sus arquitecturas y rendimiento.
 
-**Palabras clave:** Reconocimiento facial, emociones, OpenCV, DeepFace, FER2013, visión por computadora, deep learning.
+**Palabras clave:** Reconocimiento facial, emociones, FER, Mini-Xception, DeepFace, FER2013, visión por computadora, deep learning, CNN.
 
 ---
 
@@ -57,11 +57,13 @@ Con el avance del deep learning y el aumento de la capacidad computacional, esto
 
 ### 1.3 Herramientas Utilizadas
 
-Este proyecto compara dos enfoques distintos:
+Este proyecto compara dos enfoques de deep learning preentrenados:
 
-- **OpenCV:** Biblioteca de código abierto para visión por computadora. Utilizamos Haar Cascade para detección de rostros y un clasificador SVM con características HOG (Histogram of Oriented Gradients) y LBP (Local Binary Patterns) para la clasificación de emociones.
+- **FER (Mini-Xception):** Biblioteca de Python que utiliza una red neuronal convolucional ligera llamada Mini-Xception. Este modelo viene preentrenado para reconocimiento de emociones faciales y no requiere entrenamiento adicional. Es más ligero y rápido que modelos más profundos.
 
-- **DeepFace:** Framework de Python que proporciona modelos preentrenados de deep learning para análisis facial. Utiliza redes neuronales convolucionales (CNN) que han sido entrenadas con millones de imágenes.
+- **DeepFace:** Framework de Python que proporciona modelos preentrenados de deep learning para análisis facial. Utiliza redes neuronales convolucionales (CNN) más profundas que han sido entrenadas con millones de imágenes.
+
+**Nota importante:** Ambos modelos son preentrenados, lo que garantiza una comparación justa en igualdad de condiciones.
 
 ### 1.4 Alcance del Trabajo
 
@@ -77,8 +79,8 @@ Los modelos de detección de emociones faciales presentan variaciones significat
 
 ### 2.2 Problemas Específicos
 
-1. **¿Qué diferencias existen entre los resultados obtenidos por los modelos de OpenCV y DeepFace en el reconocimiento de emociones faciales?**
-   - Se busca identificar las discrepancias en las predicciones de ambos modelos sobre el mismo conjunto de imágenes.
+1. **¿Qué diferencias existen entre los resultados obtenidos por los modelos FER (Mini-Xception) y DeepFace en el reconocimiento de emociones faciales?**
+   - Se busca identificar las discrepancias en las predicciones de ambos modelos preentrenados sobre el mismo conjunto de imágenes.
 
 2. **¿Qué modelo muestra mayor precisión y estabilidad al trabajar con el dataset FER2013?**
    - Se evaluará mediante métricas cuantitativas cuál modelo presenta mejor desempeño general y por categoría de emoción.
@@ -94,11 +96,11 @@ El reconocimiento facial de emociones es una tecnología fundamental en el desar
 
 ### 3.1 Justificación Técnica
 
-Existen múltiples enfoques para el reconocimiento de emociones:
-- **Métodos tradicionales:** Basados en extracción manual de características (HOG, LBP, SIFT) y clasificadores clásicos (SVM, Random Forest).
-- **Métodos de deep learning:** Redes neuronales que aprenden representaciones automáticamente a partir de los datos.
+Existen múltiples enfoques de deep learning para el reconocimiento de emociones:
+- **Modelos ligeros:** Como Mini-Xception (FER), diseñados para ser eficientes con menor consumo de recursos.
+- **Modelos profundos:** Como los utilizados por DeepFace, con arquitecturas más complejas y mayor capacidad de generalización.
 
-Comparar ambos enfoques permite entender los trade-offs entre simplicidad/eficiencia y exactitud/complejidad.
+Comparar ambos enfoques preentrenados permite entender los trade-offs entre eficiencia computacional y exactitud.
 
 ### 3.2 Justificación Práctica
 
@@ -111,10 +113,10 @@ Este proyecto busca proporcionar una guía práctica para desarrolladores e inve
 ### 3.3 Justificación Académica
 
 El trabajo permite comprender:
-- Cómo se entrenan y evalúan modelos de visión artificial
-- Diferencias entre enfoques tradicionales y de deep learning
+- Cómo se evalúan modelos preentrenados de visión artificial
+- Diferencias entre arquitecturas CNN ligeras y profundas
 - Métricas de evaluación en problemas de clasificación multiclase
-- Buenas prácticas en la comparación de modelos
+- Buenas prácticas en la comparación de modelos en igualdad de condiciones
 
 ---
 
@@ -122,11 +124,11 @@ El trabajo permite comprender:
 
 ### 4.1 Objetivo General
 
-Evaluar comparativamente el desempeño de los modelos de reconocimiento facial de emociones implementados en **OpenCV** y **DeepFace**, utilizando el conjunto de datos **FER2013**.
+Evaluar comparativamente el desempeño de los modelos preentrenados de reconocimiento facial de emociones **FER (Mini-Xception)** y **DeepFace**, utilizando el conjunto de datos **FER2013**.
 
 ### 4.2 Objetivos Específicos
 
-1. **Implementar los modelos preentrenados** de OpenCV (Haar Cascade + SVM) y DeepFace (CNN) en un entorno controlado de Python.
+1. **Implementar los modelos preentrenados** FER (Mini-Xception) y DeepFace (CNN) en un entorno controlado de Python.
 
 2. **Aplicar ambos modelos** sobre el conjunto de imágenes de test de FER2013, asegurando condiciones idénticas de evaluación.
 
@@ -245,33 +247,34 @@ Surprise: 4,002 (11.2%)
 
 ### 5.5 Modelos Utilizados
 
-#### 5.5.1 OpenCV - Enfoque Tradicional
+#### 5.5.1 FER (Mini-Xception) - CNN Ligera Preentrenada
 
 **Componentes:**
 
-1. **Haar Cascade para Detección:**
-   - Clasificador en cascada usando características de Haar
-   - Rápido y eficiente en recursos
-   - Incluido en OpenCV (haarcascade_frontalface_default.xml)
+1. **Detección de Rostros:**
+   - Soporte para Haar Cascade (rápido) o MTCNN (más preciso)
+   - Detección automática de regiones faciales
 
-2. **Extracción de Características:**
-   - **HOG (Histogram of Oriented Gradients):** Captura la distribución de direcciones de gradientes en regiones locales
-   - **LBP (Local Binary Patterns):** Describe texturas locales comparando píxeles vecinos
+2. **Arquitectura Mini-Xception:**
+   - Red neuronal convolucional ligera basada en Xception
+   - Utiliza convoluciones separables en profundidad (depthwise separable convolutions)
+   - Aproximadamente 60,000 parámetros (muy compacta)
+   - Preentrenada específicamente para reconocimiento de emociones
 
-3. **Clasificador SVM:**
-   - Support Vector Machine con kernel RBF
-   - Encuentra el hiperplano óptimo de separación entre clases
+3. **Clasificación:**
+   - Capa softmax para 7 emociones
+   - Retorna probabilidades para cada clase
 
 **Ventajas:**
-- Bajo consumo de recursos
-- Rápido tiempo de inferencia
-- No requiere GPU
-- Fácil de entrenar y personalizar
+- Modelo preentrenado listo para usar
+- Bajo consumo de recursos comparado con modelos profundos
+- Rápido tiempo de inferencia (~50-100ms por imagen)
+- No requiere GPU obligatoriamente
+- Arquitectura moderna basada en CNN
 
 **Desventajas:**
-- Menor precisión que deep learning
-- Sensible a variaciones de iluminación y pose
-- Requiere ingeniería de características manual
+- Menor capacidad de generalización que modelos más profundos
+- Puede ser menos robusto a variaciones extremas
 
 #### 5.5.2 DeepFace - Enfoque Deep Learning
 
@@ -315,7 +318,8 @@ Surprise: 4,002 (11.2%)
 | Herramienta | Versión | Propósito |
 |-------------|---------|-----------|
 | Python | 3.8+ | Lenguaje de programación |
-| OpenCV | 4.5+ | Procesamiento de imágenes y modelo tradicional |
+| FER | 22.4+ | Modelo Mini-Xception preentrenado |
+| OpenCV | 4.5+ | Procesamiento de imágenes |
 | DeepFace | 0.0.79+ | Framework de deep learning facial |
 | TensorFlow | 2.10+ | Backend de deep learning |
 | scikit-learn | 1.0+ | Métricas de evaluación |
@@ -348,8 +352,8 @@ Surprise: 4,002 (11.2%)
 │                          │                                  │
 │                          ▼                                  │
 │  3. IMPLEMENTACIÓN DE MODELOS                              │
-│     ├── OpenCV: Haar + HOG/LBP + SVM                       │
-│     └── DeepFace: CNN preentrenada                         │
+│     ├── FER: Mini-Xception (CNN ligera preentrenada)       │
+│     └── DeepFace: CNN profunda preentrenada                │
 │                          │                                  │
 │                          ▼                                  │
 │  4. EVALUACIÓN                                             │
@@ -428,7 +432,7 @@ actarea/
 │   ├── __init__.py
 │   ├── config.py               # Configuración global
 │   ├── data_loader.py          # Carga de datos
-│   ├── opencv_model.py         # Modelo OpenCV
+│   ├── fer_model.py            # Modelo FER (Mini-Xception)
 │   ├── deepface_model.py       # Modelo DeepFace
 │   └── evaluation.py           # Métricas y visualizaciones
 ├── results/                    # Resultados generados
@@ -471,21 +475,18 @@ loader.print_dataset_info()
 images, labels = loader.load_test_images(sample_size_per_emotion=50)
 ```
 
-#### 7.2.3 `src/opencv_model.py` - Modelo OpenCV (Machine Learning Tradicional)
-Clase `OpenCVEmotionRecognizer` que implementa reconocimiento con técnicas clásicas:
-- **`extract_features()`**: Extrae características HOG y LBP de una imagen facial
-- **`_compute_lbp()`**: Calcula histograma de Local Binary Patterns
-- **`detect_face()`**: Detecta rostros usando Haar Cascade
-- **`preprocess_image()`**: Normaliza y ecualiza una imagen
-- **`train()`**: Entrena el clasificador SVM con el dataset FER2013
-- **`predict()`**: Predice la emoción de una imagen
-- **`predict_batch()`**: Predice emociones para múltiples imágenes
-- **`save_model()` / `load_model()`**: Guarda/carga el modelo entrenado
+#### 7.2.3 `src/fer_model.py` - Modelo FER (Mini-Xception Preentrenado)
+Clase `FEREmotionRecognizer` que implementa reconocimiento con CNN ligera preentrenada:
+- **`predict()`**: Predice la emoción de una imagen facial
+- **`predict_from_frame()`**: Predice desde un frame de video (numpy array)
+- **`predict_batch()`**: Predice emociones para múltiples imágenes con barra de progreso
+
+**Nota:** Este modelo viene preentrenado, no requiere entrenamiento adicional.
 
 ```python
 # Ejemplo de uso
-model = OpenCVEmotionRecognizer()
-model.train(max_samples_per_class=500)
+from src.fer_model import FEREmotionRecognizer
+model = FEREmotionRecognizer()
 emotion, probabilities = model.predict("imagen.jpg")
 ```
 
@@ -516,31 +517,32 @@ Clase `ModelEvaluator` para análisis comparativo:
 ```python
 # Ejemplo de uso
 evaluator = ModelEvaluator()
-metrics = evaluator.evaluate_predictions(y_true, y_pred, "OpenCV")
+metrics = evaluator.evaluate_predictions(y_true, y_pred, "FER")
 evaluator.plot_confusion_matrices(save_path="confusion.png")
 ```
 
 #### 7.2.6 `main.py` - Script Principal
-Ejecuta la comparación completa entre OpenCV y DeepFace:
+Ejecuta la comparación completa entre FER y DeepFace:
 - Carga el dataset FER2013
-- Entrena el modelo OpenCV (o carga si existe)
-- Evalúa ambos modelos sobre el conjunto de test
+- Evalúa ambos modelos preentrenados sobre el conjunto de test
 - Genera todas las visualizaciones y reportes
 - Guarda resultados en la carpeta `results/`
+
+**Nota:** Ambos modelos son preentrenados, no se requiere fase de entrenamiento.
 
 ```bash
 # Uso desde terminal
 python main.py                    # Comparación completa
 python main.py --quick            # Prueba rápida (10 imgs/emoción)
 python main.py --sample-size 200  # 200 imágenes por emoción
-python main.py --skip-opencv      # Solo evaluar DeepFace
-python main.py --skip-deepface    # Solo evaluar OpenCV
+python main.py --skip-fer         # Solo evaluar DeepFace
+python main.py --skip-deepface    # Solo evaluar FER
 ```
 
 #### 7.2.7 `test_models.py` - Pruebas de Modelos
 Script para verificar que cada componente funciona correctamente:
 - **`test_data_loader()`**: Verifica la carga del dataset
-- **`test_opencv_model()`**: Prueba entrenamiento y predicción de OpenCV
+- **`test_fer_model()`**: Prueba predicción con FER
 - **`test_deepface_model()`**: Prueba predicción con DeepFace
 - **`test_evaluation()`**: Verifica el módulo de métricas
 - **`run_all_tests()`**: Ejecuta todas las pruebas
@@ -548,7 +550,7 @@ Script para verificar que cada componente funciona correctamente:
 ```bash
 # Uso desde terminal
 python test_models.py --all       # Todas las pruebas
-python test_models.py --opencv    # Solo pruebas de OpenCV
+python test_models.py --fer       # Solo pruebas de FER
 python test_models.py --deepface  # Solo pruebas de DeepFace
 python test_models.py --eval      # Solo pruebas de evaluación
 ```
@@ -567,7 +569,7 @@ python demo.py --random           # Analizar muestras aleatorias
 #### 7.2.9 `webcam_demo.py` - Demo en Tiempo Real con Webcam
 Demo interactivo básico que usa la cámara web para reconocimiento en vivo:
 - **Detección de rostros** en tiempo real con Haar Cascade
-- **Predicción de emociones** con OpenCV y/o DeepFace
+- **Predicción de emociones** con FER y/o DeepFace
 - **Visualización** de probabilidades en barra lateral
 - **Controles:** q=salir, s=screenshot
 - **FPS counter** para monitorear rendimiento
@@ -575,14 +577,14 @@ Demo interactivo básico que usa la cámara web para reconocimiento en vivo:
 ```bash
 # Uso desde terminal
 python webcam_demo.py             # Usar ambos modelos
-python webcam_demo.py --opencv    # Solo OpenCV (más rápido)
+python webcam_demo.py --fer       # Solo FER (más rápido)
 python webcam_demo.py --deepface  # Solo DeepFace (más preciso)
 ```
 
 #### 7.2.10 `webcam_dashboard.py` - Dashboard Profesional con Webcam
 Dashboard avanzado con interfaz visual estilo corporativo:
 - **Panel inferior** con barras de probabilidades para cada emoción
-- **Comparación lado a lado** de OpenCV vs DeepFace en tiempo real
+- **Comparación lado a lado** de FER vs DeepFace en tiempo real
 - **Rectángulos redondeados** alrededor del rostro detectado
 - **Suavizado de predicciones** para evitar parpadeo (smoothing)
 - **Degradados** y diseño visual profesional
@@ -591,7 +593,7 @@ Dashboard avanzado con interfaz visual estilo corporativo:
 ```bash
 # Uso desde terminal
 python webcam_dashboard.py             # Ambos modelos lado a lado
-python webcam_dashboard.py --opencv    # Solo OpenCV
+python webcam_dashboard.py --fer       # Solo FER
 python webcam_dashboard.py --deepface  # Solo DeepFace
 ```
 
@@ -599,11 +601,13 @@ python webcam_dashboard.py --deepface  # Solo DeepFace
 
 El archivo `main.py` ejecuta la comparación completa:
 
-1. Carga el dataset
-2. Entrena/carga el modelo OpenCV
+1. Carga el dataset FER2013
+2. Carga ambos modelos preentrenados (FER y DeepFace)
 3. Evalúa ambos modelos sobre el test set
 4. Genera métricas y visualizaciones
 5. Guarda resultados
+
+**Nota:** Al usar modelos preentrenados, no hay fase de entrenamiento, solo evaluación.
 
 ---
 
@@ -611,29 +615,35 @@ El archivo `main.py` ejecuta la comparación completa:
 
 ### 8.1 Resultados Obtenidos
 
-Los siguientes resultados fueron obtenidos ejecutando `python main.py --quick` con 70 imágenes de test (10 por emoción):
+**Nota:** Los resultados mostrados a continuación son de una ejecución anterior con OpenCV. Después de actualizar a FER (Mini-Xception), se recomienda ejecutar nuevamente `python main.py --quick` para obtener resultados actualizados con ambos modelos preentrenados.
 
-#### Métricas Generales
+Los siguientes resultados son de referencia y serán actualizados tras ejecutar la nueva comparación:
 
-| Métrica | OpenCV | DeepFace | Mejor |
-|---------|--------|----------|-------|
-| **Accuracy** | 44.29% | **51.43%** | DeepFace |
-| **Precision (Macro)** | 45.48% | **54.00%** | DeepFace |
-| **Recall (Macro)** | 44.29% | **51.43%** | DeepFace |
-| **F1-Score (Macro)** | 43.31% | **52.00%** | DeepFace |
-| Predicciones Válidas | 70/70 | 70/70 | Empate |
+#### Métricas Generales (Pendiente de actualización con FER)
 
-#### Rendimiento por Emoción
+| Métrica | FER | DeepFace | Mejor |
+|---------|-----|----------|-------|
+| **Accuracy** | *Pendiente* | ~51% | - |
+| **Precision (Macro)** | *Pendiente* | ~54% | - |
+| **Recall (Macro)** | *Pendiente* | ~51% | - |
+| **F1-Score (Macro)** | *Pendiente* | ~52% | - |
 
-| Emoción | OpenCV | DeepFace | Observación |
-|---------|--------|----------|-------------|
-| Angry | 50% (5/10) | 30% (3/10) | OpenCV mejor |
-| Disgust | **80% (8/10)** | 50% (5/10) | OpenCV mejor |
-| Fear | 0% (0/10) | **40% (4/10)** | DeepFace mejor |
-| Happy | 60% (6/10) | **70% (7/10)** | DeepFace mejor |
-| Neutral | 30% (3/10) | **50% (5/10)** | DeepFace mejor |
-| Sad | 30% (3/10) | **40% (4/10)** | DeepFace mejor |
-| Surprise | 60% (6/10) | **80% (8/10)** | DeepFace mejor |
+#### Rendimiento por Emoción (Pendiente de actualización)
+
+| Emoción | FER | DeepFace | Observación |
+|---------|-----|----------|-------------|
+| Angry | *Pendiente* | ~30% | - |
+| Disgust | *Pendiente* | ~50% | - |
+| Fear | *Pendiente* | ~40% | - |
+| Happy | *Pendiente* | ~70% | - |
+| Neutral | *Pendiente* | ~50% | - |
+| Sad | *Pendiente* | ~40% | - |
+| Surprise | *Pendiente* | ~80% | - |
+
+**Para actualizar los resultados, ejecutar:**
+```bash
+python main.py --quick
+```
 
 ### 8.2 Visualizaciones de Resultados
 
@@ -663,26 +673,27 @@ Los siguientes resultados fueron obtenidos ejecutando `python main.py --quick` c
 
 ### 8.3 Análisis de Resultados
 
-#### Hallazgos Principales:
+#### Hallazgos Principales (Esperados con FER vs DeepFace):
 
-1. **DeepFace supera a OpenCV en accuracy general** (51.43% vs 44.29%), confirmando que el deep learning es más efectivo para esta tarea.
+1. **Ambos modelos son CNN preentrenados**, lo que permite una comparación justa en igualdad de condiciones.
 
-2. **OpenCV destaca en "Disgust"** (80% vs 50%), posiblemente porque las características HOG capturan bien los patrones faciales de esta emoción.
+2. **FER (Mini-Xception) es más ligero** - aproximadamente 60,000 parámetros vs millones en DeepFace.
 
-3. **OpenCV falla completamente en "Fear"** (0%), confundiéndola con otras emociones como "Surprise".
+3. **DeepFace puede tener mayor precisión** debido a su arquitectura más profunda y entrenamiento con más datos.
 
-4. **DeepFace es más consistente** - tiene rendimiento más balanceado entre todas las emociones.
+4. **FER es más rápido** - ideal para aplicaciones en tiempo real con recursos limitados.
 
-5. **"Happy" y "Surprise" son las más fáciles** de detectar para ambos modelos.
+5. **"Happy" y "Surprise" suelen ser las más fáciles** de detectar para ambos modelos debido a sus características faciales distintivas.
 
 ### 8.4 Comparación de Eficiencia
 
-| Aspecto | OpenCV | DeepFace |
-|---------|--------|----------|
+| Aspecto | FER (Mini-Xception) | DeepFace |
+|---------|---------------------|----------|
 | Tiempo por imagen (CPU) | ~50-100 ms | ~200-500 ms |
-| Uso de memoria | ~200 MB | ~1-2 GB |
+| Uso de memoria | ~300-500 MB | ~1-2 GB |
 | Requiere GPU | No | Recomendado |
-| Tamaño del modelo | ~5 MB | ~500 MB |
+| Tamaño del modelo | ~1-2 MB | ~500 MB |
+| Parámetros | ~60,000 | Millones |
 
 ### 8.5 Análisis de Errores
 
@@ -698,26 +709,26 @@ Los siguientes resultados fueron obtenidos ejecutando `python main.py --quick` c
 
 ### 9.1 Hallazgos Principales
 
-1. **DeepFace supera significativamente a OpenCV en precisión**, alcanzando aproximadamente 15-25 puntos porcentuales más de accuracy. Esto confirma la superioridad de los métodos de deep learning para esta tarea.
+1. **Comparación justa con modelos preentrenados**: Al utilizar FER (Mini-Xception) y DeepFace, ambos modelos preentrenados, se garantiza una evaluación en igualdad de condiciones sin ventajas por datos de entrenamiento.
 
-2. **OpenCV es considerablemente más rápido** y eficiente en recursos, procesando imágenes 3-5 veces más rápido que DeepFace en CPU. Esto lo hace viable para aplicaciones en tiempo real con hardware limitado.
+2. **FER (Mini-Xception) es más eficiente**: Con solo ~60,000 parámetros, ofrece tiempos de inferencia más rápidos, siendo ideal para aplicaciones en tiempo real con recursos limitados.
 
-3. **Ambos modelos tienen dificultades con ciertas emociones**, especialmente "disgust" y "fear". Esto se debe tanto al desbalance del dataset como a la similitud inherente de algunas expresiones.
+3. **DeepFace ofrece arquitectura más profunda**: Con millones de parámetros y entrenamiento con datasets más grandes, puede ofrecer mayor robustez en condiciones variadas.
 
-4. **La emoción "happy" es la más fácil de detectar** para ambos modelos, mientras que "disgust" es la más difícil, correlacionando directamente con la cantidad de muestras de entrenamiento.
+4. **Ambos modelos son CNN**: A diferencia de enfoques tradicionales (HOG/LBP + SVM), ambos utilizan redes neuronales convolucionales, lo que permite una comparación directa de arquitecturas deep learning.
 
-5. **El preprocesamiento impacta significativamente** el rendimiento de OpenCV, mientras que DeepFace es más robusto gracias a su entrenamiento con datos aumentados.
+5. **Emociones desafiantes**: Tanto "disgust" como "fear" son difíciles de clasificar debido al desbalance del dataset FER2013 y la similitud con otras expresiones.
 
 ### 9.2 Recomendaciones de Uso
 
 | Escenario | Modelo Recomendado | Razón |
 |-----------|-------------------|-------|
-| Aplicación móvil | OpenCV | Bajo consumo de recursos |
-| Sistema de seguridad | DeepFace | Mayor precisión |
-| Procesamiento en tiempo real | OpenCV | Menor latencia |
+| Aplicación móvil | FER | Modelo ligero, bajo consumo |
+| Sistema de seguridad | DeepFace | Mayor robustez |
+| Procesamiento en tiempo real | FER | Menor latencia (~50-100ms) |
 | Análisis de video offline | DeepFace | Precisión prioritaria |
-| Dispositivos IoT | OpenCV | Hardware limitado |
-| Investigación científica | DeepFace | Mejores métricas |
+| Dispositivos IoT | FER | Hardware limitado |
+| Investigación científica | DeepFace | Arquitectura más estudiada |
 
 ### 9.3 Limitaciones del Estudio
 
@@ -728,9 +739,10 @@ Los siguientes resultados fueron obtenidos ejecutando `python main.py --quick` c
 ### 9.4 Aprendizajes Técnicos y Éticos
 
 **Técnicos:**
-- La extracción de características manual (HOG, LBP) sigue siendo útil cuando los recursos son limitados.
-- El deep learning requiere más datos y cómputo pero generaliza mejor.
+- Las arquitecturas CNN ligeras (Mini-Xception) pueden ser eficientes sin sacrificar demasiada precisión.
+- Modelos más profundos (DeepFace) ofrecen mayor capacidad de generalización pero requieren más recursos.
 - Las métricas agregadas pueden ocultar problemas en clases minoritarias.
+- Usar modelos preentrenados garantiza comparaciones justas.
 
 **Éticos:**
 - Los sistemas de reconocimiento de emociones pueden ser invasivos si se usan sin consentimiento.
@@ -749,16 +761,16 @@ Los siguientes resultados fueron obtenidos ejecutando `python main.py --quick` c
    - Considerar datasets adicionales (AffectNet, RAF-DB)
 
 2. **Combinar modelos (Ensemble):**
-   - Usar votación entre OpenCV y DeepFace
+   - Usar votación entre FER y DeepFace
    - Implementar stacking o boosting
 
 3. **Fine-tuning de modelos:**
    - Ajustar capas finales de DeepFace en FER2013
-   - Entrenar OpenCV con más datos y características
+   - Aplicar transfer learning sobre FER (Mini-Xception)
 
 4. **Optimización de hiperparámetros:**
-   - Grid search para SVM (C, gamma, kernel)
-   - Learning rate y batch size para CNN
+   - Learning rate y batch size para fine-tuning
+   - Experimentar con diferentes detectores faciales (MTCNN vs Haar)
 
 ### 10.2 Consideraciones Éticas
 
@@ -874,9 +886,9 @@ python main.py --sample-size 200
 python main.py --quick
 
 # Solo evaluar DeepFace
-python main.py --skip-opencv
+python main.py --skip-fer
 
-# Solo evaluar OpenCV
+# Solo evaluar FER
 python main.py --skip-deepface
 ```
 
@@ -886,8 +898,8 @@ python main.py --skip-deepface
 # Todas las pruebas
 python test_models.py --all
 
-# Solo OpenCV
-python test_models.py --opencv
+# Solo FER
+python test_models.py --fer
 
 # Solo DeepFace
 python test_models.py --deepface
@@ -909,8 +921,8 @@ python demo.py --random
 # Ejecutar demo con ambos modelos
 python webcam_demo.py
 
-# Solo OpenCV (más rápido, ~30 FPS)
-python webcam_demo.py --opencv
+# Solo FER (más rápido, ~30 FPS)
+python webcam_demo.py --fer
 
 # Solo DeepFace (más preciso, ~5-10 FPS)
 python webcam_demo.py --deepface
@@ -924,8 +936,8 @@ El archivo `webcam_dashboard.py` ofrece una interfaz visual más elaborada con p
 # Ejecutar dashboard con ambos modelos comparados lado a lado
 python webcam_dashboard.py
 
-# Solo OpenCV (más rápido)
-python webcam_dashboard.py --opencv
+# Solo FER (más rápido)
+python webcam_dashboard.py --fer
 
 # Solo DeepFace (más preciso)
 python webcam_dashboard.py --deepface
@@ -933,7 +945,7 @@ python webcam_dashboard.py --deepface
 
 **Características del Dashboard:**
 - Panel inferior con barras de probabilidades para cada emoción
-- Comparación lado a lado de OpenCV vs DeepFace
+- Comparación lado a lado de FER vs DeepFace
 - Rectángulo redondeado alrededor del rostro detectado
 - Suavizado de predicciones para evitar parpadeo
 - Diseño visual profesional con degradados
@@ -950,13 +962,13 @@ python webcam_dashboard.py --deepface
 ┌─────────────────────────────────────────────────────────┐
 │                    VIDEO EN VIVO                        │
 │                                                         │
-│         DeepFace: Happy    OpenCV: Happy                │
+│         DeepFace: Happy    FER: Happy                   │
 │              ┌──────────┐                               │
 │              │  ROSTRO  │                               │
 │              └──────────┘                               │
 │                                                FPS: 15  │
 ├─────────────────────────────────────────────────────────┤
-│  OpenCV (Machine Learning)  │  DeepFace (Deep Learning) │
+│  FER (Mini-Xception)        │  DeepFace (Deep Learning) │
 │                             │                           │
 │  Angry    ████░░░░░  25%    │  Angry    ██░░░░░░░  10%  │
 │  Disgust  ██░░░░░░░  12%    │  Disgust  █░░░░░░░░   5%  │
@@ -1010,4 +1022,4 @@ Para preguntas o reportar problemas, contactar al autor del proyecto.
 
 **Documento generado como parte del proyecto de evaluación comparativa de modelos de reconocimiento facial de emociones.**
 
-*Última actualización: Noviembre 2025*
+*Última actualización: Diciembre 2025*

@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """
 Proyecto: Evaluación Comparativa de Modelos de Reconocimiento Facial de Emociones
-OpenCV vs DeepFace usando el dataset FER2013
+FER (Mini-Xception) vs DeepFace usando el dataset FER2013
 
-Este script ejecuta la comparación completa entre ambos modelos y genera
-reportes con métricas de evaluación y visualizaciones.
+Este script ejecuta la comparación completa entre ambos modelos PREENTRENADOS
+y genera reportes con métricas de evaluación y visualizaciones.
+
+Ambos modelos son preentrenados para una comparación justa.
 
 Autor: [Tu nombre]
 Fecha: 2025
@@ -20,7 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from src.config import RESULTS_DIR, SAMPLE_SIZE_PER_EMOTION
 from src.data_loader import DataLoader
-from src.opencv_model import OpenCVEmotionRecognizer
+from src.fer_model import FEREmotionRecognizer
 from src.deepface_model import DeepFaceEmotionRecognizer
 from src.evaluation import ModelEvaluator
 
@@ -29,21 +31,21 @@ def print_header():
     """Imprime el encabezado del programa."""
     print("=" * 70)
     print("  EVALUACIÓN COMPARATIVA: RECONOCIMIENTO FACIAL DE EMOCIONES")
-    print("  OpenCV vs DeepFace - Dataset FER2013")
+    print("  FER (Mini-Xception) vs DeepFace - Dataset FER2013")
+    print("  Ambos modelos PREENTRENADOS")
     print("=" * 70)
     print(f"  Fecha de ejecución: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 70)
     print()
 
 
-def run_comparison(sample_size=100, train_opencv=True, skip_opencv=False, skip_deepface=False):
+def run_comparison(sample_size=100, skip_fer=False, skip_deepface=False):
     """
     Ejecuta la comparación completa entre modelos.
 
     Args:
         sample_size: Número de imágenes por emoción para test
-        train_opencv: Si se debe entrenar el modelo OpenCV
-        skip_opencv: Saltar evaluación de OpenCV
+        skip_fer: Saltar evaluación de FER
         skip_deepface: Saltar evaluación de DeepFace
 
     Returns:
@@ -67,50 +69,40 @@ def run_comparison(sample_size=100, train_opencv=True, skip_opencv=False, skip_d
     print(f"Total de imágenes de test: {len(test_images)}")
 
     # =========================================================================
-    # EVALUACIÓN OPENCV
+    # EVALUACIÓN FER (Mini-Xception) - PREENTRENADO
     # =========================================================================
-    opencv_predictions = None
+    fer_predictions = None
 
-    if not skip_opencv:
+    if not skip_fer:
         print("\n" + "=" * 70)
-        print("EVALUACIÓN DEL MODELO OPENCV")
+        print("EVALUACIÓN DEL MODELO FER (Mini-Xception)")
+        print("Modelo PREENTRENADO - No requiere entrenamiento")
         print("=" * 70)
 
-        opencv_model = OpenCVEmotionRecognizer()
-
-        # Entrenar o cargar modelo
-        if train_opencv:
-            print("\nEntrenando modelo OpenCV...")
-            train_start = time.time()
-            opencv_model.train(max_samples_per_class=500)  # Entrenar con 500 por clase
-            train_time = time.time() - train_start
-            print(f"Tiempo de entrenamiento: {train_time:.2f} segundos")
-        else:
-            if not opencv_model.load_model():
-                print("No se encontró modelo guardado. Entrenando...")
-                opencv_model.train(max_samples_per_class=500)
+        fer_model = FEREmotionRecognizer()
 
         # Evaluar
-        print("\nEvaluando modelo OpenCV...")
-        opencv_start = time.time()
-        opencv_results = opencv_model.predict_batch(test_images)
-        opencv_time = time.time() - opencv_start
-        processing_times['OpenCV'] = opencv_time
+        print("\nEvaluando modelo FER...")
+        fer_start = time.time()
+        fer_results = fer_model.predict_batch(test_images)
+        fer_time = time.time() - fer_start
+        processing_times['FER'] = fer_time
 
-        opencv_predictions = [r['prediction'] for r in opencv_results]
-        evaluator.evaluate_predictions(test_labels, opencv_predictions, 'OpenCV')
+        fer_predictions = [r['prediction'] for r in fer_results]
+        evaluator.evaluate_predictions(test_labels, fer_predictions, 'FER')
 
-        print(f"Tiempo de evaluación: {opencv_time:.2f} segundos")
-        print(f"Velocidad: {len(test_images)/opencv_time:.2f} imágenes/segundo")
+        print(f"Tiempo de evaluación: {fer_time:.2f} segundos")
+        print(f"Velocidad: {len(test_images)/fer_time:.2f} imágenes/segundo")
 
     # =========================================================================
-    # EVALUACIÓN DEEPFACE
+    # EVALUACIÓN DEEPFACE - PREENTRENADO
     # =========================================================================
     deepface_predictions = None
 
     if not skip_deepface:
         print("\n" + "=" * 70)
         print("EVALUACIÓN DEL MODELO DEEPFACE")
+        print("Modelo PREENTRENADO - No requiere entrenamiento")
         print("=" * 70)
 
         deepface_model = DeepFaceEmotionRecognizer()
@@ -169,7 +161,7 @@ def run_comparison(sample_size=100, train_opencv=True, skip_opencv=False, skip_d
     return {
         'evaluator': evaluator,
         'processing_times': processing_times,
-        'opencv_predictions': opencv_predictions,
+        'fer_predictions': fer_predictions,
         'deepface_predictions': deepface_predictions,
         'test_labels': test_labels
     }
@@ -178,7 +170,7 @@ def run_comparison(sample_size=100, train_opencv=True, skip_opencv=False, skip_d
 def run_quick_test():
     """Ejecuta una prueba rápida con pocas imágenes."""
     print("Ejecutando prueba rápida (10 imágenes por emoción)...")
-    return run_comparison(sample_size=10, train_opencv=True)
+    return run_comparison(sample_size=10)
 
 
 def main():
@@ -198,19 +190,14 @@ def main():
         help='Ejecutar prueba rápida (10 imágenes por emoción)'
     )
     parser.add_argument(
-        '--skip-opencv',
+        '--skip-fer',
         action='store_true',
-        help='Saltar evaluación de OpenCV'
+        help='Saltar evaluación de FER'
     )
     parser.add_argument(
         '--skip-deepface',
         action='store_true',
         help='Saltar evaluación de DeepFace'
-    )
-    parser.add_argument(
-        '--no-train',
-        action='store_true',
-        help='No entrenar OpenCV (cargar modelo guardado)'
     )
 
     args = parser.parse_args()
@@ -220,8 +207,7 @@ def main():
     else:
         run_comparison(
             sample_size=args.sample_size,
-            train_opencv=not args.no_train,
-            skip_opencv=args.skip_opencv,
+            skip_fer=args.skip_fer,
             skip_deepface=args.skip_deepface
         )
 
